@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { CHARACTER_ASSETS, getShopAssetKey, SHOP_ASSETS } from '../data/assets';
 import { getShopsWithRecipes, type ShopWithRecipe } from '../data/shops';
 import { SaveSystem } from '../systems/SaveSystem';
 import { HUD } from '../ui/HUD';
@@ -92,7 +93,14 @@ export class StreetScene extends Phaser.Scene {
 
   private drawShops(): void {
     getShopsWithRecipes().forEach((shop) => {
-      this.add.rectangle(shop.x, shop.y, 210, 84, shop.color).setStrokeStyle(4, 0x1f2933);
+      const textureKey = getShopAssetKey(shop.id);
+
+      if (this.textures.exists(textureKey)) {
+        this.add.image(shop.x, shop.y, textureKey).setDisplaySize(210, 84);
+      } else {
+        this.add.rectangle(shop.x, shop.y, 210, 84, shop.color).setStrokeStyle(4, 0x1f2933);
+      }
+
       this.add
         .text(shop.x, shop.y - 12, shop.name, {
           fontFamily: 'Arial, "Microsoft YaHei", sans-serif',
@@ -121,7 +129,12 @@ export class StreetScene extends Phaser.Scene {
     const color = save.myShopUnlocked ? 0x71c562 : 0x5d6670;
     const label = save.myShopUnlocked ? 'My Shop' : 'My Shop Locked';
 
-    this.add.rectangle(770, 540, 210, 84, color).setStrokeStyle(4, 0x1f2933);
+    if (save.myShopUnlocked && this.textures.exists(SHOP_ASSETS.my_shop)) {
+      this.add.image(770, 540, SHOP_ASSETS.my_shop).setDisplaySize(210, 84);
+    } else {
+      this.add.rectangle(770, 540, 210, 84, color).setStrokeStyle(4, 0x1f2933);
+    }
+
     this.add
       .text(770, 532, label, {
         fontFamily: 'Arial, "Microsoft YaHei", sans-serif',
@@ -143,7 +156,9 @@ export class StreetScene extends Phaser.Scene {
   private createPlayer(): void {
     const save = SaveSystem.load();
     const playerColor = save.selectedCharacter === 'female' ? 0xf18f9b : 0x5fa8d3;
-    const textureKey = `player-${playerColor}`;
+    const characterAssetKey =
+      save.selectedCharacter === 'female' ? CHARACTER_ASSETS.female : CHARACTER_ASSETS.male;
+    const textureKey = this.textures.exists(characterAssetKey) ? characterAssetKey : `player-${playerColor}`;
 
     if (!this.textures.exists(textureKey)) {
       const graphics = this.add.graphics();
@@ -156,6 +171,7 @@ export class StreetScene extends Phaser.Scene {
     }
 
     this.player = this.physics.add.image(480, 575, textureKey);
+    this.player.setDisplaySize(28, 36);
     this.player.setCollideWorldBounds(true);
     this.player.body.setSize(24, 32);
   }

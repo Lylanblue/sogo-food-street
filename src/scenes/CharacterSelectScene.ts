@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { CHARACTER_ASSETS } from '../data/assets';
 import { SaveSystem, type CharacterType } from '../systems/SaveSystem';
 
 export class CharacterSelectScene extends Phaser.Scene {
@@ -28,8 +29,14 @@ export class CharacterSelectScene extends Phaser.Scene {
       .setStrokeStyle(4, 0xf6c85f)
       .setInteractive({ useHandCursor: true });
 
-    this.add.rectangle(x, y - 45, 70, 110, color).setStrokeStyle(3, 0xffffff);
-    this.add.circle(x, y - 120, 34, color).setStrokeStyle(3, 0xffffff);
+    const textureKey = CHARACTER_ASSETS[character];
+
+    if (this.textures.exists(textureKey)) {
+      this.add.image(x, y - 60, textureKey).setDisplaySize(96, 128);
+    } else {
+      this.add.rectangle(x, y - 45, 70, 110, color).setStrokeStyle(3, 0xffffff);
+      this.add.circle(x, y - 120, 34, color).setStrokeStyle(3, 0xffffff);
+    }
     this.add
       .text(x, y + 105, label, {
         fontFamily: 'Arial, "Microsoft YaHei", sans-serif',

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getFoodAssetKey } from '../data/assets';
 import { getShopById, type ShopWithRecipe } from '../data/shops';
 import { SaveSystem } from '../systems/SaveSystem';
 import { DialogBox } from '../ui/DialogBox';
@@ -59,6 +60,11 @@ export class ShopScene extends Phaser.Scene {
         color: '#d9e6ef'
       })
       .setOrigin(0.5);
+
+    const foodAssetKey = getFoodAssetKey(recipe.id);
+    if (this.textures.exists(foodAssetKey)) {
+      this.add.image(780, 132, foodAssetKey).setDisplaySize(96, 96);
+    }
 
     recipe.ingredientOptions.forEach((ingredient, index) => {
       const col = index % 3;

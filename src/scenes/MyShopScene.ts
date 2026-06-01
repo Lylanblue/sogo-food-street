@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { SHOP_ASSETS } from '../data/assets';
 import { SaveSystem } from '../systems/SaveSystem';
 
 export class MyShopScene extends Phaser.Scene {
@@ -11,7 +12,12 @@ export class MyShopScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor('#2f5545');
 
-    this.add.rectangle(480, 325, 560, 360, 0x8ecf73).setStrokeStyle(6, 0x1f2933);
+    if (save.myShopUnlocked && this.textures.exists(SHOP_ASSETS.my_shop)) {
+      this.add.image(480, 325, SHOP_ASSETS.my_shop).setDisplaySize(560, 360);
+    } else {
+      this.add.rectangle(480, 325, 560, 360, 0x8ecf73).setStrokeStyle(6, 0x1f2933);
+    }
+
     this.add.rectangle(480, 225, 430, 70, 0xf6c85f).setStrokeStyle(4, 0x1f2933);
     this.add.rectangle(480, 385, 340, 120, 0x7b4a32).setStrokeStyle(4, 0x1f2933);
 
