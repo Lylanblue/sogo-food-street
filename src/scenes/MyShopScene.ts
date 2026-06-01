@@ -11,11 +11,22 @@ export class MyShopScene extends Phaser.Scene {
     const save = SaveSystem.load();
 
     this.cameras.main.setBackgroundColor('#2f5545');
+    this.add.rectangle(480, 560, 960, 160, 0x536b4d);
+    this.add.rectangle(480, 530, 960, 76, 0x6f5440);
+    for (let x = 70; x < 960; x += 92) {
+      this.add.circle(x, 104, 10, 0xffd36b, 0.55);
+      this.add.line(0, 0, x - 45, 104, x + 45, 104, 0xffd36b, 0.25).setOrigin(0);
+    }
 
     if (save.myShopUnlocked && this.textures.exists(SHOP_ASSETS.my_shop)) {
       this.add.image(480, 325, SHOP_ASSETS.my_shop).setDisplaySize(560, 360);
     } else {
+      this.add.rectangle(490, 336, 574, 374, 0x000000, 0.2);
       this.add.rectangle(480, 325, 560, 360, 0x8ecf73).setStrokeStyle(6, 0x1f2933);
+      this.add.rectangle(480, 180, 592, 70, 0xffd36b).setStrokeStyle(5, 0x1f2933);
+      this.add.rectangle(330, 352, 86, 144, 0x7b4a32).setStrokeStyle(4, 0x1f2933);
+      this.add.rectangle(512, 354, 220, 100, 0xfff2d1, 0.78).setStrokeStyle(4, 0x1f2933);
+      this.add.circle(640, 264, 28, 0xffb347, 0.8).setStrokeStyle(3, 0x8a3d2b);
     }
 
     this.add.rectangle(480, 225, 430, 70, 0xf6c85f).setStrokeStyle(4, 0x1f2933);

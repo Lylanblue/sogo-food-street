@@ -8,13 +8,16 @@ export class CharacterSelectScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.cameras.main.setBackgroundColor('#31475b');
+    this.cameras.main.setBackgroundColor('#2d4f65');
+    this.drawBackground();
 
     this.add
       .text(480, 90, 'Select Character', {
         fontFamily: 'Arial, "Microsoft YaHei", sans-serif',
         fontSize: '44px',
-        color: '#ffffff'
+        color: '#fff0a8',
+        stroke: '#253747',
+        strokeThickness: 6
       })
       .setOrigin(0.5);
 
@@ -23,7 +26,21 @@ export class CharacterSelectScene extends Phaser.Scene {
     this.createTextButton(480, 540, 'Back', () => this.scene.start('MainMenuScene'));
   }
 
+  private drawBackground(): void {
+    this.add.rectangle(480, 570, 960, 140, 0x516b4f);
+    for (let x = 58; x < 960; x += 86) {
+      this.add.rectangle(x, 570, 54, 16, 0x6f8461, 0.85);
+      this.add.circle(x + 26, 520, 12, 0xffd36b, 0.35);
+    }
+    this.add.text(480, 154, 'Choose your apprentice chef', {
+      fontFamily: 'Arial, "Microsoft YaHei", sans-serif',
+      fontSize: '20px',
+      color: '#fff7df'
+    }).setOrigin(0.5);
+  }
+
   private createCharacterCard(x: number, y: number, character: CharacterType, color: number, label: string): void {
+    const shadow = this.add.rectangle(x + 7, y + 8, 218, 308, 0x000000, 0.22);
     const card = this.add
       .rectangle(x, y, 210, 300, 0x21313f)
       .setStrokeStyle(4, 0xf6c85f)
@@ -34,8 +51,13 @@ export class CharacterSelectScene extends Phaser.Scene {
     if (this.textures.exists(textureKey)) {
       this.add.image(x, y - 60, textureKey).setDisplaySize(96, 128);
     } else {
-      this.add.rectangle(x, y - 45, 70, 110, color).setStrokeStyle(3, 0xffffff);
-      this.add.circle(x, y - 120, 34, color).setStrokeStyle(3, 0xffffff);
+      this.add.ellipse(x, y - 124, 60, 54, 0xffd7ad).setStrokeStyle(3, 0x4b3425);
+      this.add.rectangle(x, y - 54, 72, 104, color).setStrokeStyle(3, 0xffffff);
+      this.add.rectangle(x - 22, y - 110, 10, 8, 0x263847);
+      this.add.rectangle(x + 22, y - 110, 10, 8, 0x263847);
+      this.add.rectangle(x, y - 88, 34, 6, 0xffffff, 0.9);
+      this.add.rectangle(x - 38, y - 45, 18, 74, 0xffd7ad).setStrokeStyle(2, 0x4b3425);
+      this.add.rectangle(x + 38, y - 45, 18, 74, 0xffd7ad).setStrokeStyle(2, 0x4b3425);
     }
     this.add
       .text(x, y + 105, label, {
@@ -50,8 +72,14 @@ export class CharacterSelectScene extends Phaser.Scene {
       this.scene.start('StreetScene');
     };
 
-    card.on('pointerover', () => card.setFillStyle(0x2b4052));
-    card.on('pointerout', () => card.setFillStyle(0x21313f));
+    card.on('pointerover', () => {
+      card.setFillStyle(0x2b4052);
+      this.tweens.add({ targets: [shadow, card], scaleX: 1.03, scaleY: 1.03, duration: 120 });
+    });
+    card.on('pointerout', () => {
+      card.setFillStyle(0x21313f);
+      this.tweens.add({ targets: [shadow, card], scaleX: 1, scaleY: 1, duration: 120 });
+    });
     card.on('pointerdown', select);
   }
 

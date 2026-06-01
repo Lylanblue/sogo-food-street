@@ -31,17 +31,24 @@ export class ShopScene extends Phaser.Scene {
     }
 
     this.cameras.main.setBackgroundColor('#273642');
+    this.drawKitchenBackground();
     this.resultDialog = new DialogBox(this, 480, 555, 820, 90);
 
     const recipe = this.shop.recipe;
     const save = SaveSystem.load();
     const alreadyLearned = save.learnedRecipes.includes(recipe.id);
 
+    this.add.rectangle(480, 240, 750, 330, 0x1f2933, 0.5);
+    this.add.rectangle(480, 238, 730, 310, 0x334656, 0.94).setStrokeStyle(4, 0xf6c85f);
+    this.add.rectangle(480, 412, 660, 34, 0x7b4a32).setStrokeStyle(3, 0x3a241a);
+
     this.add
       .text(480, 62, this.shop.name, {
         fontFamily: 'Arial, "Microsoft YaHei", sans-serif',
         fontSize: '40px',
-        color: '#f8e7a2'
+        color: '#fff0a8',
+        stroke: '#1f2933',
+        strokeThickness: 6
       })
       .setOrigin(0.5);
 
@@ -64,6 +71,8 @@ export class ShopScene extends Phaser.Scene {
     const foodAssetKey = getFoodAssetKey(recipe.id);
     if (this.textures.exists(foodAssetKey)) {
       this.add.image(780, 132, foodAssetKey).setDisplaySize(96, 96);
+    } else {
+      this.drawFoodBadge(780, 132, recipe.name);
     }
 
     recipe.ingredientOptions.forEach((ingredient, index) => {
@@ -84,14 +93,36 @@ export class ShopScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ESC', () => this.scene.start('StreetScene'));
   }
 
+  private drawKitchenBackground(): void {
+    this.add.rectangle(480, 590, 960, 100, 0x5e4635);
+    for (let x = 42; x < 960; x += 64) {
+      this.add.rectangle(x, 590, 50, 16, 0x6f5440, 0.75);
+    }
+    this.add.circle(104, 102, 24, 0xffd36b, 0.16);
+    this.add.circle(856, 102, 24, 0xffd36b, 0.16);
+  }
+
+  private drawFoodBadge(x: number, y: number, label: string): void {
+    this.add.circle(x, y, 52, 0xfff2d1).setStrokeStyle(4, 0x8b5a3c);
+    this.add.circle(x, y + 2, 34, this.shop?.color ?? 0xf6c85f, 0.86);
+    this.add.text(x, y, label.slice(0, 2), {
+      fontFamily: 'Arial, "Microsoft YaHei", sans-serif',
+      fontSize: '24px',
+      color: '#ffffff',
+      stroke: '#1f2933',
+      strokeThickness: 4
+    }).setOrigin(0.5);
+  }
+
   private createIngredientOption(x: number, y: number, ingredient: string): void {
+    this.add.rectangle(x + 4, y + 5, 166, 48, 0x000000, 0.2);
     const option = this.add
       .text(x, y, `[ ] ${ingredient}`, {
         fontFamily: 'Arial, "Microsoft YaHei", sans-serif',
         fontSize: '21px',
         color: '#ffffff',
-        backgroundColor: '#1f2933',
-        padding: { x: 14, y: 10 }
+        backgroundColor: '#263847',
+        padding: { x: 16, y: 11 }
       })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
@@ -105,6 +136,8 @@ export class ShopScene extends Phaser.Scene {
 
       this.refreshIngredientOptions();
     });
+    option.on('pointerover', () => this.tweens.add({ targets: option, scaleX: 1.05, scaleY: 1.05, duration: 80 }));
+    option.on('pointerout', () => this.tweens.add({ targets: option, scaleX: 1, scaleY: 1, duration: 80 }));
 
     this.optionTexts.push(option);
   }
@@ -116,7 +149,7 @@ export class ShopScene extends Phaser.Scene {
       option.setText(`${selected ? '[x]' : '[ ]'} ${ingredient}`);
       option.setStyle({
         color: selected ? '#1f2933' : '#ffffff',
-        backgroundColor: selected ? '#f6c85f' : '#1f2933'
+        backgroundColor: selected ? '#f6c85f' : '#263847'
       });
     });
   }
@@ -135,14 +168,35 @@ export class ShopScene extends Phaser.Scene {
 
     if (!isCorrect) {
       this.resultDialog.show('Not quite right. Try again.');
+      this.cameras.main.shake(120, 0.004);
       return;
     }
 
     SaveSystem.learnRecipe(recipe.id, recipe.rewardCoins);
+    this.showCoinPopup(recipe.rewardCoins);
 
     this.resultDialog.show(
       `Great! You learned ${recipe.name} and earned ${recipe.rewardCoins} coins.`
     );
+  }
+
+  private showCoinPopup(coins: number): void {
+    const popup = this.add.text(480, 484, `+${coins} coins`, {
+      fontFamily: 'Arial, "Microsoft YaHei", sans-serif',
+      fontSize: '26px',
+      color: '#ffd36b',
+      stroke: '#1f2933',
+      strokeThickness: 5
+    }).setOrigin(0.5);
+
+    this.tweens.add({
+      targets: popup,
+      y: 448,
+      alpha: 0,
+      duration: 900,
+      ease: 'Quad.easeOut',
+      onComplete: () => popup.destroy()
+    });
   }
 
   private createButton(x: number, y: number, label: string, onClick: () => void): void {
@@ -158,5 +212,7 @@ export class ShopScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     button.on('pointerdown', onClick);
+    button.on('pointerover', () => this.tweens.add({ targets: button, scaleX: 1.05, scaleY: 1.05, duration: 90 }));
+    button.on('pointerout', () => this.tweens.add({ targets: button, scaleX: 1, scaleY: 1, duration: 90 }));
   }
 }
